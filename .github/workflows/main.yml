@@ -40,9 +40,11 @@ jobs:
         uses: hashicorp/setup-terraform@v1
 
       - name: Terraform Init
+        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
         run: terraform init
 
       - name: Terraform Plan
+        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
         run: terraform plan -out=tfplan
 
       - name: Install TFSec
@@ -52,4 +54,17 @@ jobs:
           sudo mv tfsec /usr/local/bin/
 
       - name: TFSec Scan
+        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
         run: tfsec --format sarif --out tfsec-results.sarif
+
+      - name: Notify CodeQL results
+        run: |
+          echo "CodeQL analysis completed. Review the results at [CodeQL results URL]"
+
+      - name: Notify Docker scan results
+        run: |
+          echo "Docker security scan completed. Review the results at [Docker scan results URL]"
+
+      - name: Notify TFSec results
+        run: |
+          echo "TFSec scan completed. Review the results at [TFSec results URL]"
