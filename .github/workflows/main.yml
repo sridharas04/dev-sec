@@ -27,11 +27,6 @@ jobs:
       - name: Build Docker image
         run: docker build -t myapp .
 
-      - name: Dependabot security update
-        uses: dependabot/dependabot-core@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: CodeQL analysis
         uses: github/codeql-action/analyze@v2
         with:
