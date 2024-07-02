@@ -51,21 +51,20 @@ jobs:
           sudo mv tfsec /usr/local/bin/
 
       - name: TFSec Scan
-        run: tfsec .
+        run: tfsec --format sarif --out tfsec-results.sarif
 
       - name: Upload CodeQL scan results
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: codeql-results.sarif
 
-      - name: Run Terraform Security Scan
-        run: tfsec .
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
-      - name: Save combined report
+      - name: Combine SARIF reports
         run: |
-          # Combine SARIF files into a single report
-          cat codeql-results.sarif > combined_report.sarif
-          cat tfsec-results.sarif >> combined_report.sarif
+          echo 'Combining SARIF files...'
+          jq -s '.[0].runs += .[1].runs | .[0]' codeql-results.sarif tfsec-results.sarif > combined_report.sarif
 
       - name: Upload combined report as artifact
         uses: actions/upload-artifact@v2
