@@ -8,25 +8,23 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  security-events: write
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [12.x]
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      - name: Verify repository contents
-        run: ls -l
-
-      - name: Set up Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
-          node-version: '12' # Change this to a compatible Node.js version
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       - name: Clear npm cache
         run: npm cache clean --force
@@ -35,44 +33,26 @@ jobs:
         run: |
           npm install bcrypt@latest || npm install bcryptjs@latest
 
-      - name: Build Docker image
-        run: docker build -t myapp .
-
-      - name: Run Snyk for Docker scan
-        continue-on-error: true
-        uses: snyk/actions/docker@v1.0.0
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          image: myapp
-
-      - name: Run Snyk for Code scan
-        continue-on-error: true
-        uses: snyk/actions/code@v1.0.0
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Snyk to check configuration files for security issues
-        continue-on-error: true
-        uses: snyk/actions/iac@v0.4.0
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          file: ./terraform/ # Adjust this path to your IaC file
-
-      - name: Upload Snyk results to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: snyk.sarif
-
-      - name: Notify Snyk Docker scan results
+      - name: Setup Snyk + snyk-to-html
         run: |
-          echo "Snyk Docker scan completed. Review the results in the Snyk dashboard."
+          npm install snyk -g
+          npm install snyk-to-html -g
+          snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Notify Snyk Code scan results
-        run: |
-          echo "Snyk Code scan completed. Review the results in the Snyk dashboard."
+      - name: Snyk Open Source
+        run: snyk monitor
 
-      - name: Notify Snyk IaC scan results
+      - name: Snyk Code
+        run: snyk code test || true
+
+      - name: Snyk Container
         run: |
-          echo "Snyk IaC scan completed. Review the results in the Snyk dashboard."
+          docker build . -t myapp
+          snyk container monitor myapp --file=Dockerfile
+
+      - name: Snyk IaC
+        run: snyk iac test || true
+
+      - name: Notify Snyk results
+        run: |
+          echo "Snyk scans completed. Review the results in the Snyk dashboard."
