@@ -37,9 +37,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install bcrypt@latest || npm install bcryptjs@latest
+         npm install || npm install bcrypt@latest || npm install bcryptjs@latest
 
-      - name: Setup Snyk + snyk-to-html
+      - name: Setup Snyk
         run: |
           npm install snyk -g
           npm install snyk-to-html -g
