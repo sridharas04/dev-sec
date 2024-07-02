@@ -1,12 +1,11 @@
 name: CI/CD DevSecOps Pipeline
+name: Snyk SCA, Code, IaC and Container CLI monitor example
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -22,46 +21,42 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Verify repository contents
-        run: ls -l
+        uses: actions/checkout@v2
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '12'
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
       - name: Clear npm cache
         run: npm cache clean --force
 
       - name: Install dependencies
         run: |
-         npm install || npm install bcrypt@latest || npm install bcryptjs@latest
+          npm install && npm install bcrypt@latest || npm install bcryptjs@latest
 
-      - name: Setup Snyk
+      - name: Setup Snyk + snyk-to-html
         run: |
           npm install snyk -g
           npm install snyk-to-html -g
           snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Open Source Scanning
-        run: |
-          snyk test --json-file-output=results-opensource.json
-          snyk-to-html -i results-opensource.json -o results-opensource.html
-        continue-on-error: true
-      - name: Upload Open Source results
+        run: snyk test --all-projects --json-file-output=results-opensource.json
+      - name: Convert Snyk Open Source results to HTML
+        run: snyk-to-html -i results-opensource.json -o results-opensource.html
+      - name: Upload Snyk Open Source results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-opensource-report
           path: results-opensource.html
 
       - name: Snyk Code Scanning
-        run: |
-          snyk code test --json-file-output=results-code.json
-          snyk-to-html -i results-code.json -o results-code.html
-        continue-on-error: true
-      - name: Upload Code results
+        run: snyk code test --json-file-output=results-code.json || true
+      - name: Convert Snyk Code results to HTML
+        run: snyk-to-html -i results-code.json -o results-code.html
+      - name: Upload Snyk Code results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-code-report
@@ -70,25 +65,21 @@ jobs:
       - name: Snyk Container Scanning
         run: |
           docker build . -t myapp
-          snyk container test myapp --file=Dockerfile --json-file-output=results-container.json
-          snyk-to-html -i results-container.json -o results-container.html
-        continue-on-error: true
-      - name: Upload Container results
+          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp || true
+      - name: Convert Snyk Container results to HTML
+        run: snyk-to-html -i results-container.json -o results-container.html
+      - name: Upload Snyk Container results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-container-report
           path: results-container.html
 
-      - name: Snyk Infrastructure-as-Code Scanning
-        run: |
-          snyk iac test --json-file-output=results-iac.json
-          snyk-to-html -i results-iac.json -o results-iac.html
-        continue-on-error: true
-      - name: Upload IaC results
+      - name: Snyk IaC Scanning
+        run: snyk iac test --json-file-output=results-iac.json || true
+      - name: Convert Snyk IaC results to HTML
+        run: snyk-to-html -i results-iac.json -o results-iac.html
+      - name: Upload Snyk IaC results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-iac-report
           path: results-iac.html
-
-      - name: Notify Snyk results
-        run: echo "Snyk scans completed. Review the results in the uploaded HTML reports."
