@@ -26,7 +26,6 @@ jobs:
         run: ls -l ./terraform # Adjust this path to the directory containing your Terraform files
 
       - name: Terrascan Scan
-        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
         run: terrascan scan -o sarif > terrascan-results.sarif
 
       - name: Notify CodeQL results
