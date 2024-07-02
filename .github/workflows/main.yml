@@ -58,3 +58,46 @@ jobs:
       - name: TFSec Scan
         run: tfsec .
 
+      - name: Upload CodeQL scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: codeql-results.sarif
+
+      - name: Run Terraform Security Scan
+        run: tfsec .
+
+      - name: Save combined report
+        run: |
+          # Combine SARIF files into a single report
+          cat codeql-results.sarif > combined_report.sarif
+          cat tfsec-results.sarif >> combined_report.sarif
+
+      - name: Upload combined report as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: combined-report
+          path: combined_report.sarif
+
+      - name: Send combined report via GitHub notification
+        if: always()
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const contents = fs.readFileSync('combined_report.sarif', 'utf8');
+            github.repos.createOrUpdateFileContents({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'combined_report.sarif',
+              message: 'Upload combined security scan report',
+              content: Buffer.from(contents).toString('base64'),
+              committer: {
+                name: 'GitHub Actions',
+                email: 'actions@github.com'
+              },
+              author: {
+                name: 'GitHub Actions',
+                email: 'actions@github.com'
+              }
+            });
