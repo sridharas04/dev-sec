@@ -23,7 +23,7 @@ jobs:
         run: terrascan version
 
       - name: List Terraform files
-        run: ls -l ./terraform # Adjust this path to the directory containing your Terraform files
+        run: ls -l # Adjust this path to the directory containing your Terraform files
 
       - name: Terrascan Scan
         run: terrascan scan -o sarif > terrascan-results.sarif
