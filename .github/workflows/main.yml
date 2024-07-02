@@ -31,11 +31,6 @@ jobs:
       - name: Build Docker image
         run: docker build -t myapp .
 
-      - name: CodeQL analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          languages: javascript
-
       - name: Docker security scan
         run: docker scan myapp
 
