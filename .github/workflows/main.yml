@@ -57,45 +57,14 @@ jobs:
       - name: TFSec Scan
         run: tfsec --format sarif --out tfsec-results.sarif
 
-      - name: Upload CodeQL scan results
-        uses: github/codeql-action/upload-sarif@v2
-        with:
-          sarif_file: codeql-results.sarif
-
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Combine SARIF reports
+      - name: Notify CodeQL results
         run: |
-          echo 'Combining SARIF files...'
-          jq -s '.[0].runs += .[1].runs | .[0]' codeql-results.sarif tfsec-results.sarif > combined_report.sarif
+          echo "CodeQL analysis completed. Review the results at [CodeQL results URL]"
 
-      - name: Upload combined report as artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: combined-report
-          path: combined_report.sarif
+      - name: Notify Docker scan results
+        run: |
+          echo "Docker security scan completed. Review the results at [Docker scan results URL]"
 
-      - name: Send combined report via GitHub notification
-        if: always()
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            const contents = fs.readFileSync('combined_report.sarif', 'utf8');
-            github.repos.createOrUpdateFileContents({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'combined_report.sarif',
-              message: 'Upload combined security scan report',
-              content: Buffer.from(contents).toString('base64'),
-              committer: {
-                name: 'GitHub Actions',
-                email: 'actions@github.com'
-              },
-              author: {
-                name: 'GitHub Actions',
-                email: 'actions@github.com'
-              }
-            });
+      - name: Notify TFSec results
+        run: |
+          echo "TFSec scan completed. Review the results at [TFSec results URL]"
