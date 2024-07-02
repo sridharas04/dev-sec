@@ -1,0 +1,60 @@
+name: CI/CD DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Docker image
+        run: docker build -t myapp .
+
+      - name: Dependabot security update
+        uses: dependabot/dependabot-core@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: CodeQL analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: javascript
+
+      - name: Docker security scan
+        run: docker scan myapp
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Install TFSec
+        run: |
+          wget -qO- https://github.com/aquasecurity/tfsec/releases/download/v0.58.7/tfsec-linux-amd64 > tfsec && \
+          chmod +x tfsec && \
+          sudo mv tfsec /usr/local/bin/
+
+      - name: TFSec Scan
+        run: tfsec .
+
