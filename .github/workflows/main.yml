@@ -1,4 +1,4 @@
-name: CI/CD Security Setup
+name: CI/CD Devsecops
 
 on:
   push:
@@ -13,6 +13,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 12.x ]
 
     steps:
       - name: Checkout repository
@@ -33,25 +37,49 @@ jobs:
         run: |
           npm install && npm install bcrypt@latest || npm install bcryptjs@latest
 
-      - name: Setup Snyk + snyk-to-html
+      - name: Setup Snyk
         run: |
           npm install snyk -g
           npm install snyk-to-html -g
           snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Snyk Open Source
-        run: snyk monitor
+      - name: Snyk Open Source Scanning
+        run: snyk test --all-projects --sarif-file-output=snyk-oss.sarif
+        continue-on-error: true
 
-      - name: Snyk Code
-        run: snyk code test || true
+      - name: Upload results to GitHub Open Source Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk-oss.sarif
 
-      - name: Snyk Container
+      - name: Snyk Code Scanning
+        run: snyk code test --sarif-file-output=snyk-code.sarif
+        continue-on-error: true
+
+      - name: Upload results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk-code.sarif
+
+      - name: Snyk Container Scanning
         run: |
           docker build . -t myapp
-          snyk container monitor myapp --file=Dockerfile
+          snyk container test --file=Dockerfile --sarif-file-output=snyk-container.sarif myapp
+        continue-on-error: true
 
-      - name: Snyk IaC
-        run: snyk iac test || true
+      - name: Upload results to GitHub Container Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk-container.sarif
+
+      - name: Snyk Infrastructure-as-Code Scanning
+        run: snyk iac test --sarif-file-output=snyk-iac.sarif
+        continue-on-error: true
+
+      - name: Upload results to GitHub IaC Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk-iac.sarif
 
       - name: Notify Snyk results
         run: |
