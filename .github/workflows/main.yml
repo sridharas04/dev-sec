@@ -36,18 +36,21 @@ jobs:
         with:
           image-ref: myapp
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-
-      - name: Install TFSec
+      - name: Install Terrascan
         run: |
-          wget -qO- https://github.com/aquasecurity/tfsec/releases/download/v0.58.7/tfsec-linux-amd64 > tfsec && \
-          chmod +x tfsec && \
-          sudo mv tfsec /usr/local/bin/
+          curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
+          tar -xf terrascan.tar.gz terrascan && rm terrascan.tar.gz
+          sudo install terrascan /usr/local/bin && rm terrascan
 
-      - name: TFSec Scan
+      - name: Verify Terrascan installation
+        run: terrascan version
+
+      - name: List Terraform files
+        run: ls -l ./terraform # Adjust this path to the directory containing your Terraform files
+
+      - name: Terrascan Scan
         working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
-        run: tfsec --format sarif --out tfsec-results.sarif
+        run: terrascan scan -o sarif > terrascan-results.sarif
 
       - name: Notify CodeQL results
         run: |
