@@ -43,7 +43,7 @@ jobs:
           sudo install terrascan /usr/local/bin && rm terrascan
 
       - name: List Terraform files
-        run: ls -l /home/runner/work/dev-sec/ # Adjust this path to the directory containing your Terraform files
+        run: ls -al # Adjust this path to the directory containing your Terraform files
 
       # - name: Terrascan Scan
       #   working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
