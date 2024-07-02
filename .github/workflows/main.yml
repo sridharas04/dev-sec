@@ -39,14 +39,6 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
 
-      - name: Terraform Init
-        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
-        run: terraform init
-
-      - name: Terraform Plan
-        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
-        run: terraform plan -out=tfplan
-
       - name: Install TFSec
         run: |
           wget -qO- https://github.com/aquasecurity/tfsec/releases/download/v0.58.7/tfsec-linux-amd64 > tfsec && \
