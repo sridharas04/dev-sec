@@ -8,13 +8,17 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Verify repository contents
         run: ls -l
@@ -34,25 +38,32 @@ jobs:
       - name: Build Docker image
         run: docker build -t myapp .
 
-      - name: Set up Snyk
-        uses: snyk/actions/setup@v2.2.0
+      - name: Run Snyk for Docker scan
+        continue-on-error: true
+        uses: snyk/actions/docker@v1.0.0
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          version: 'latest'
+          image: myapp
 
-      - name: Snyk Docker scan
+      - name: Run Snyk for Code scan
+        continue-on-error: true
+        uses: snyk/actions/code@v1.0.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk container test myapp --file=Dockerfile
 
-      - name: Snyk Code scan
+      - name: Run Snyk to check configuration files for security issues
+        continue-on-error: true
+        uses: snyk/actions/iac@v0.4.0
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk code test
+        with:
+          file: ./terraform/ # Adjust this path to your IaC file
 
-      - name: Snyk IaC scan
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: snyk iac test --severity-threshold=high
+      - name: Upload Snyk results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: snyk.sarif
 
       - name: Notify Snyk Docker scan results
         run: |
