@@ -1,5 +1,4 @@
 name: CI/CD DevSecOps Pipeline
-name: Snyk SCA, Code, IaC and Container CLI monitor example
 
 on:
   push:
