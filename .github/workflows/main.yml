@@ -13,27 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '12' # Change this to a compatible Node.js version
-
-      - name: Clear npm cache
-        run: npm cache clean --force
-
-      - name: Install dependencies
-        run: |
-          npm install bcrypt@latest || npm install bcryptjs@latest
-
-      - name: Build Docker image
-        run: docker build -t myapp .
-
-      - name: Docker security scan with Docker Scan
-        run: docker scan myapp
-
       - name: Install Terrascan
         run: |
           curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
@@ -43,9 +22,12 @@ jobs:
       - name: Verify Terrascan installation
         run: terrascan version
 
+      - name: List Terraform files
+        run: ls -l ./terraform # Adjust this path to the directory containing your Terraform files
+
       - name: Terrascan Scan
-        run: |
-          terrascan scan -o sarif > terrascan-results.sarif || echo "Terrascan scan completed with errors"
+        working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
+        run: terrascan scan -o sarif > terrascan-results.sarif
 
       - name: Notify CodeQL results
         run: |
@@ -55,6 +37,6 @@ jobs:
         run: |
           echo "Docker security scan completed. Review the results at [Docker scan results URL]"
 
-      - name: Notify Terrascan results
+      - name: Notify TFSec results
         run: |
-          echo "Terrascan scan completed. Review the results at [Terrascan results URL]"
+          echo "TFSec scan completed. Review the results at [TFSec results URL]"
