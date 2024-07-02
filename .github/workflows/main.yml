@@ -13,7 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
     
       - name: Install dependencies
         run: |
-          npm install bcrypt@latest || npm install bcryptjs@latest
+          npm install bcrypt@latest || npm install bcryptjs@latest || npm install
 
       - name: Setup Snyk + snyk-to-html
         run: |
