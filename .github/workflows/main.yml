@@ -31,8 +31,10 @@ jobs:
       - name: Build Docker image
         run: docker build -t myapp .
 
-      - name: Docker security scan
-        run: docker scan myapp
+      - name: Docker security scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: myapp
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
@@ -51,15 +53,3 @@ jobs:
 
       - name: TFSec Scan
         run: tfsec --format sarif --out tfsec-results.sarif
-
-      - name: Notify CodeQL results
-        run: |
-          echo "CodeQL analysis completed. Review the results at [CodeQL results URL]"
-
-      - name: Notify Docker scan results
-        run: |
-          echo "Docker security scan completed. Review the results at [Docker scan results URL]"
-
-      - name: Notify TFSec results
-        run: |
-          echo "TFSec scan completed. Review the results at [TFSec results URL]"
