@@ -1,10 +1,12 @@
-name: CI/CD Devsecops
+name: CI/CD DevSecOps Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 permissions:
   contents: read
@@ -16,71 +18,77 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 12.x ]
+        node-version: [12.x]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-    
+
       - name: Verify repository contents
         run: ls -l
-    
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '12'
-    
+
       - name: Clear npm cache
         run: npm cache clean --force
-    
+
       - name: Install dependencies
         run: |
-          npm install && npm install bcrypt@latest || npm install bcryptjs@latest
+          npm install bcrypt@latest || npm install bcryptjs@latest
 
-      - name: Setup Snyk
+      - name: Setup Snyk + snyk-to-html
         run: |
           npm install snyk -g
           npm install snyk-to-html -g
           snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Snyk Open Source Scanning
-        run: snyk test --all-projects --sarif-file-output=snyk-oss.sarif
+        run: |
+          snyk test --json-file-output=results-opensource.json
+          snyk-to-html -i results-opensource.json -o results-opensource.html
         continue-on-error: true
-
-      - name: Upload results to GitHub Open Source Scanning
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload Open Source results
+        uses: actions/upload-artifact@v2
         with:
-          sarif_file: snyk-oss.sarif
+          name: snyk-opensource-report
+          path: results-opensource.html
 
       - name: Snyk Code Scanning
-        run: snyk code test --sarif-file-output=snyk-code.sarif
+        run: |
+          snyk code test --json-file-output=results-code.json
+          snyk-to-html -i results-code.json -o results-code.html
         continue-on-error: true
-
-      - name: Upload results to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload Code results
+        uses: actions/upload-artifact@v2
         with:
-          sarif_file: snyk-code.sarif
+          name: snyk-code-report
+          path: results-code.html
 
       - name: Snyk Container Scanning
         run: |
           docker build . -t myapp
-          snyk container test --file=Dockerfile --sarif-file-output=snyk-container.sarif myapp
+          snyk container test myapp --file=Dockerfile --json-file-output=results-container.json
+          snyk-to-html -i results-container.json -o results-container.html
         continue-on-error: true
-
-      - name: Upload results to GitHub Container Scanning
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload Container results
+        uses: actions/upload-artifact@v2
         with:
-          sarif_file: snyk-container.sarif
+          name: snyk-container-report
+          path: results-container.html
 
       - name: Snyk Infrastructure-as-Code Scanning
-        run: snyk iac test --sarif-file-output=snyk-iac.sarif
+        run: |
+          snyk iac test --json-file-output=results-iac.json
+          snyk-to-html -i results-iac.json -o results-iac.html
         continue-on-error: true
-
-      - name: Upload results to GitHub IaC Scanning
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Upload IaC results
+        uses: actions/upload-artifact@v2
         with:
-          sarif_file: snyk-iac.sarif
+          name: snyk-iac-report
+          path: results-iac.html
 
       - name: Notify Snyk results
-        run: |
-          echo "Snyk scans completed. Review the results in the Snyk dashboard."
+        run: echo "Snyk scans completed. Review the results in the uploaded HTML reports."
