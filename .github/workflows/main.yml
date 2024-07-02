@@ -13,42 +13,55 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # - name: Checkout repository
-      #   uses: actions/checkout@v2
-
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: '12' # Change this to a compatible Node.js version
-
-      # - name: Clear npm cache
-      #   run: npm cache clean --force
-
-      # - name: Install dependencies
-      #   run: |
-      #     npm install bcrypt@latest || npm install bcryptjs@latest
-
-      # - name: Build Docker image
-      #   run: docker build -t myapp .
-
-      # - name: Docker security scan with Trivy
-      #   uses: aquasecurity/trivy-action@master
-      #   with:
-      #     image-ref: myapp
-
-      # - name: Install Terrascan
-      #   run: |
-      #     curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
-      #     tar -xf terrascan.tar.gz terrascan && rm terrascan.tar.gz
-      #     sudo install terrascan /usr/local/bin && rm terrascan
-
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Terraform security scan
-        uses: triat/terraform-security-scan@v3.0.0
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: Terrascan Scan
-      #   working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
-      #   run: terrascan scan -o sarif > terrascan-results.sarif
+      - name: Verify repository contents
+        run: ls -l
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12' # Change this to a compatible Node.js version
+
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Install dependencies
+        run: |
+          npm install bcrypt@latest || npm install bcryptjs@latest
+
+      - name: Build Docker image
+        run: docker build -t myapp .
+
+      - name: Set up Snyk
+        uses: snyk/actions/setup@v1
+        with:
+          version: 'latest'
+
+      - name: Snyk Docker scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk container test myapp --file=Dockerfile
+
+      - name: Snyk Code scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk code test
+
+      - name: Snyk IaC scan
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk iac test --severity-threshold=high
+
+      - name: Notify Snyk Docker scan results
+        run: |
+          echo "Snyk Docker scan completed. Review the results in the Snyk dashboard."
+
+      - name: Notify Snyk Code scan results
+        run: |
+          echo "Snyk Code scan completed. Review the results in the Snyk dashboard."
+
+      - name: Notify Snyk IaC scan results
+        run: |
+          echo "Snyk IaC scan completed. Review the results in the Snyk dashboard."
