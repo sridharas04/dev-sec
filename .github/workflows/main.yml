@@ -1,10 +1,10 @@
+name: CI/CD Security Setup
+
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -13,50 +13,46 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [12.x]
-
-        steps:
-          - name: Checkout repository
-            uses: actions/checkout@v4
     
-          - name: Verify repository contents
-            run: ls -l
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
     
-          - name: Set up Node.js
-            uses: actions/setup-node@v2
-            with:
-              node-version: '12'
+      - name: Verify repository contents
+        run: ls -l
     
-          - name: Clear npm cache
-            run: npm cache clean --force
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
     
-          - name: Install dependencies
-            run: |
-              npm install bcrypt@latest || npm install bcryptjs@latest
+      - name: Clear npm cache
+        run: npm cache clean --force
+    
+      - name: Install dependencies
+        run: |
+          npm install bcrypt@latest || npm install bcryptjs@latest
 
-          - name: Setup Snyk + snyk-to-html
-            run: |
-              npm install snyk -g
-              npm install snyk-to-html -g
-              snyk auth ${{ secrets.SNYK_TOKEN }}
+      - name: Setup Snyk + snyk-to-html
+        run: |
+          npm install snyk -g
+          npm install snyk-to-html -g
+          snyk auth ${{ secrets.SNYK_TOKEN }}
 
-          - name: Snyk Open Source
-            run: snyk monitor
+      - name: Snyk Open Source
+        run: snyk monitor
 
-          - name: Snyk Code
-            run: snyk code test || true
+      - name: Snyk Code
+        run: snyk code test || true
 
-          - name: Snyk Container
-            run: |
-              docker build . -t myapp
-              snyk container monitor myapp --file=Dockerfile
+      - name: Snyk Container
+        run: |
+          docker build . -t myapp
+          snyk container monitor myapp --file=Dockerfile
 
-          - name: Snyk IaC
-            run: snyk iac test || true
+      - name: Snyk IaC
+        run: snyk iac test || true
 
-          - name: Notify Snyk results
-            run: |
-              echo "Snyk scans completed. Review the results in the Snyk dashboard."
+      - name: Notify Snyk results
+        run: |
+          echo "Snyk scans completed. Review the results in the Snyk dashboard."
