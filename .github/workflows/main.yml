@@ -46,7 +46,7 @@ jobs:
         run: terrascan version
 
       - name: List Terraform files
-        run: ls -l terraform # Adjust this path to the directory containing your Terraform files
+        run: pwd && ls -l / # Adjust this path to the directory containing your Terraform files
 
       # - name: Terrascan Scan
       #   working-directory: ./terraform # Adjust this path to the directory containing your Terraform files
