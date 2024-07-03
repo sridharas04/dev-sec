@@ -24,9 +24,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify repository contents
-        run: ls -l
-
       # - name: Set up Node.js
       #   uses: actions/setup-node@v2
       #   with:
@@ -38,6 +35,12 @@ jobs:
       # - name: Install dependencies
       #   run: |
       #     npm install || npm install bcrypt@latest || npm install bcryptjs@latest
+
+      - name: Gitleaks Secret Scanning
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "--path=. --report-format=json --report-path=gitleaks-report.json"
+        continue-on-error: true
 
       # - name: Setup Snyk
       #   run: |
@@ -90,14 +93,4 @@ jobs:
       #     name: snyk-iac-report
       #     path: results-iac.html
 
-      - name: Gitleaks Secret Scanning
-        uses: gitleaks/gitleaks-action@v2
-        with:
-          args: "--path=. --report-format=json --report-path=gitleaks-report.json"
-        continue-on-error: true
 
-      - name: Upload Gitleaks Secret Scanning results
-        uses: actions/upload-artifact@v2
-        with:
-          name: gitleaks-report
-          path: gitleaks-report.json
