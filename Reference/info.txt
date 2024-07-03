@@ -1,3 +1,4 @@
 https://github.com/zaproxy/action-full-scan
+https://github.com/zaproxy/action-baseline
 https://github.com/snyk-labs/snyk-cicd-integration-examples
 https://github.com/gitleaks/gitleaks
