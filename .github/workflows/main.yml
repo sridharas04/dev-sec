@@ -94,11 +94,11 @@ jobs:
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:9090'
-          cmd_options: '-r zap-report.html'
+          cmd_options: '-r /zap/wrk/zap-report.html'
         continue-on-error: true
 
       - name: Upload OWASP ZAP Report
         uses: actions/upload-artifact@v2
         with:
           name: zap-report
-          path: zap-report.html
+          path: /zap/wrk/zap-report.html
