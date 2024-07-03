@@ -46,6 +46,7 @@ jobs:
         run: |
           snyk test --all-projects --json-file-output=results-opensource.json || true
           snyk-to-html -i results-opensource.json -o results-opensource.html
+      - name: Upload Snyk Open Source results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-opensource-report
@@ -55,6 +56,7 @@ jobs:
         run: |
           snyk code test --json-file-output=results-code.json || true
           snyk-to-html -i results-code.json -o results-code.html
+      - name: Upload Snyk Code results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-code-report
@@ -65,6 +67,7 @@ jobs:
           docker build . -t myapp
           snyk container test --file=Dockerfile --json-file-output=results-container.json myapp || true
           snyk-to-html -i results-container.json -o results-container.html
+      - name: Upload Snyk Container results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-container-report
@@ -74,13 +77,20 @@ jobs:
         run: |
           snyk iac test --json-file-output=results-iac.json || true
           snyk-to-html -i results-iac.json -o results-iac.html
+      - name: Upload Snyk IaC results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-iac-report
           path: results-iac.html
-      
+
+      - name: Build Docker image
+        run: docker build . -t myapp
+
       - name: Run Docker container
         run: docker run -d -p 3000:3000 --name myapp_container myapp
+
+      - name: Wait for the container to be ready
+        run: sleep 10
 
       - name: ZAP Scan
         uses: zaproxy/action-full-scan@v0.10.0
