@@ -24,9 +24,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+
       - name: Install dependencies
         run: |
-          actions/setup-node@v2 --with node-version='12'
           npm cache clean --force
           npm install || npm install bcrypt@latest || npm install bcryptjs@latest
 
