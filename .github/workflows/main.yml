@@ -94,12 +94,12 @@ jobs:
         run: mkdir -p ./zap-reports
 
       - name: OWASP ZAP Baseline Scan
-        run: docker run --rm -v ${{ github.workspace }}/zap-reports:/zap/wrk/:rw --network="host" ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:9090 -r zap-report.html
+        run: docker run --rm -v ${{ github.workspace }}/zap-reports:/zap/wrk/:rw --network="host" ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://localhost:9090 -r ${{ github.workspace }}/zap-reports/zap-report.html
         continue-on-error: true
 
       - name: Upload OWASP ZAP Report
         uses: actions/upload-artifact@v2
         with:
           name: zap-report
-          path: zap-reports/zap-report.html
+          path: ${{ github.workspace }}/zap-reports/zap-report.html
 
