@@ -88,10 +88,10 @@ jobs:
       #     path: results-iac.html
 
       - name: Run Docker container
-        run: docker build . -t myapp || docker run --name myapp -p 9090:9090 -d myapp
+        run: docker build . -t myapp 
 
       - name: Wait for the container to be ready
-        run: curl http://localhost:9090
+        run: docker run --name myapp -p 9090:9090 -d myapp && sleep 10 && curl http://localhost:9090
 
       # - name: ZAP Scan
       #   uses: zaproxy/action-full-scan@v0.10.0
