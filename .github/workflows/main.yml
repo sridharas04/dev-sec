@@ -45,56 +45,49 @@ jobs:
           npm install snyk-to-html -g
           snyk auth ${{ secrets.SNYK_TOKEN }}
 
-      - name: Snyk Open Source Scanning
-        run: snyk test --all-projects --json-file-output=results-opensource.json
-        continue-on-error: true
-
-      - name: Convert Snyk Open Source results to HTML
-        run: snyk-to-html -i results-opensource.json -o results-opensource.html
-
-      - name: Upload Snyk Open Source results
+      - name: Snyk Open Source Scanning and Upload
+        run: |
+          snyk test --all-projects --json-file-output=results-opensource.json || true
+          snyk-to-html -i results-opensource.json -o results-opensource.html
         uses: actions/upload-artifact@v2
         with:
           name: snyk-opensource-report
           path: results-opensource.html
 
-      - name: Snyk Code Scanning
-        run: snyk code test --json-file-output=results-code.json
-        continue-on-error: true
-
-      - name: Convert Snyk Code results to HTML
-        run: snyk-to-html -i results-code.json -o results-code.html
-
-      - name: Upload Snyk Code results
+      - name: Snyk Code Scanning and Upload
+        run: |
+          snyk code test --json-file-output=results-code.json || true
+          snyk-to-html -i results-code.json -o results-code.html
         uses: actions/upload-artifact@v2
         with:
           name: snyk-code-report
           path: results-code.html
 
-      - name: Snyk Container Scanning
+      - name: Snyk Container Scanning and Upload
         run: |
           docker build . -t myapp
-          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
-        continue-on-error: true
-
-      - name: Convert Snyk Container results to HTML
-        run: snyk-to-html -i results-container.json -o results-container.html
-
-      - name: Upload Snyk Container results
+          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp || true
+          snyk-to-html -i results-container.json -o results-container.html
         uses: actions/upload-artifact@v2
         with:
           name: snyk-container-report
           path: results-container.html
 
-      - name: Snyk IaC Scanning
-        run: snyk iac test --json-file-output=results-iac.json
-        continue-on-error: true
-
-      - name: Convert Snyk IaC results to HTML
-        run: snyk-to-html -i results-iac.json -o results-iac.html
-
-      - name: Upload Snyk IaC results
+      - name: Snyk IaC Scanning and Upload
+        run: |
+          snyk iac test --json-file-output=results-iac.json || true
+          snyk-to-html -i results-iac.json -o results-iac.html
         uses: actions/upload-artifact@v2
         with:
           name: snyk-iac-report
           path: results-iac.html
+
+      - name: Gitleaks Secret Scanning and Upload
+        uses: zricethezav/gitleaks-action@v1.4.4
+        with:
+          args: "--path=. --report-format=json --report-path=gitleaks-report.json"
+        continue-on-error: true
+        uses: actions/upload-artifact@v2
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
