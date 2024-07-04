@@ -21,18 +21,16 @@ jobs:
         node-version: [12.x]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Installing Project Dependencies
         uses: actions/setup-node@v2
         with:
           node-version: '12'
-
-      - name: Install dependencies
         run: |
           npm cache clean --force
-          npm install || npm install bcrypt@latest || npm install bcryptjs@latest
+          npm install || npm install bcrypt@latest || npm install bcryptjs@latest || npm install junit2html
 
       - name: Gitleaks Secret Scanning
         uses: gitleaks/gitleaks-action@v2
@@ -40,70 +38,58 @@ jobs:
           args: "--path=. --report-format=json --report-path=gitleaks-report.json"
         continue-on-error: true
 
-      - name: Setup Snyk
+      - name: Scanning Project Dependencies - SCA
         run: |
           npm install snyk -g
           npm install snyk-to-html -g
           snyk auth ${{ secrets.SNYK_TOKEN }}
-
-      - name: Snyk Open Source Scanning
-        run: |
           snyk test --all-projects --json-file-output=results-opensource.json || true
           snyk-to-html -i results-opensource.json -o results-opensource.html
-      - name: Upload Snyk Open Source results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-opensource-report
           path: results-opensource.html
 
-      - name: Snyk Code Scanning
+      - name: Scanning Source Code - SAST
         run: |
           snyk code test --json-file-output=results-code.json || true
           snyk-to-html -i results-code.json -o results-code.html
-      - name: Upload Snyk Code results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-code-report
           path: results-code.html
 
-      - name: Snyk Container Scanning
+      - name: Docker Container Scanning
         run: |
           docker build . -t myapp
           snyk container test --file=Dockerfile --json-file-output=results-container.json myapp || true
           snyk-to-html -i results-container.json -o results-container.html
-      - name: Upload Snyk Container results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-container-report
           path: results-container.html
 
-      - name: Snyk IaC Scanning
+      - name: Scanning Terraform Scaripts -IaC
         run: |
           snyk iac test --json-file-output=results-iac.json || true
           snyk-to-html -i results-iac.json -o results-iac.html
-      - name: Upload Snyk IaC results
         uses: actions/upload-artifact@v2
         with:
           name: snyk-iac-report
           path: results-iac.html
 
-      - name: Running Dast Scan 
+      - name: Running DAST Scan 
         id: Scan
         continue-on-error: true
         uses: PortSwigger/dastardly-github-action@v1.0.0
         with:
           target-url: 'https://juice-shop.herokuapp.com/'
           output-filename: 'dastardly-report.xml'
-
-      - name: Install dependencies
-        run: pip install junit2html
-
-      - name: Convert XML to HTML
         run: |
           cd ${GITHUB_WORKSPACE}
           junit2html dastardly-report.xml dastardly-report.html
 
-      - name: Upload Dastardly Report
+      - name: Uploading Reports to Artifacts
         uses: actions/upload-artifact@v3.1.2 
         with:
           name: Dastardly-Report
