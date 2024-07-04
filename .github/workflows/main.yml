@@ -23,11 +23,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-   
-      - name: Installing Project Dependencies
+
+      - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: '12'
+      
+      - name: Install Project Dependencies
         run: |
           npm cache clean --force
           npm install 
