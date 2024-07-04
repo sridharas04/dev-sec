@@ -86,15 +86,22 @@ jobs:
       #   with:
       #     name: snyk-iac-report
       #     path: results-iac.html
-
       - name: Wait for the container to be ready
         run: docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
 
-      - name: Run Burp DAST
+      - name: Run Dastardly Action Step
         continue-on-error: true
         uses: PortSwigger/dastardly-github-action@main
         with:
-          target-url: 'https://ginandjuice.shop'
+          target-url: 'http://localhost:9090'
+          output-filename: 'dastardly-report.xml'
+
+      - name: Upload Dastardly Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: dastardly-report
+          path: dastardly-report.xml
+
 
 
 
