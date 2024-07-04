@@ -85,7 +85,7 @@ jobs:
         with:
           name: All-Reports
           path: |
-            dastardly-report.xml
+            dastardly-report.html
             gitleaks-report.json
             results-opensource.html
             results-code.html
