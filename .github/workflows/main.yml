@@ -35,7 +35,9 @@ jobs:
           npm install 
           npm install bcrypt@latest 
           npm install bcryptjs@latest 
-          npm install junit2html -g
+          npm install snyk -g
+          npm install snyk-to-html -g
+          pip install junit2html
 
       - name: Gitleaks Secret Scanning
         uses: gitleaks/gitleaks-action@v2
@@ -45,8 +47,6 @@ jobs:
 
       - name: Scanning Project Dependencies - SCA
         run: |
-          npm install snyk -g
-          npm install snyk-to-html -g
           snyk auth ${{ secrets.SNYK_TOKEN }}
           snyk test --all-projects --json-file-output=results-opensource.json || true
           snyk-to-html -i results-opensource.json -o results-opensource.html
