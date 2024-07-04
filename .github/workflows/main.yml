@@ -72,7 +72,7 @@ jobs:
         continue-on-error: true
         uses: PortSwigger/dastardly-github-action@v1.0.0
         with:
-          target-url: 'http://localhost:9090/'
+          target-url: 'https://juice-shop.herokuapp.com/'
           output-filename: 'dastardly-report.xml'
 
       - name: Processing DAST Report
@@ -85,9 +85,9 @@ jobs:
         with:
           name: All-Reports
           path: |
+            dastardly-report.xml
+            gitleaks-report.json
             results-opensource.html
             results-code.html
             results-container.html
             results-iac.html
-            dastardly-report.html
-            gitleaks-report.json
