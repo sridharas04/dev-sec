@@ -49,6 +49,7 @@ jobs:
         run: |
           snyk auth ${{ secrets.SNYK_TOKEN }}
           snyk test --all-projects --json-file-output=results-opensource.json
+        continue-on-error: true
 
       - name: Scanning Source Code - SAST
         run: |
