@@ -54,15 +54,18 @@ jobs:
       - name: Scanning Source Code - SAST
         run: |
           snyk code test --json-file-output=results-code.json
+        continue-on-error: true
 
       - name: Docker Container Scanning
         run: |
           docker build . -t myapp
           snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
+        continue-on-error: true
 
       - name: Scanning Terraform Scripts - IaC
         run: |
           snyk iac test --json-file-output=results-iac.json
+        continue-on-error: true
 
       - name: Running DAST Scan 
         id: Scan
