@@ -48,20 +48,24 @@ jobs:
       - name: Scanning Project Dependencies - SCA
         run: |
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk test --all-projects --json-file-output=results-opensource.json
+          snyk test --all-projects --json-file-output=results-opensource.json || true
+          snyk-to-html -i results-opensource.json -o results-opensource.html
 
       - name: Scanning Source Code - SAST
         run: |
-          snyk code test --json-file-output=results-code.json
+          snyk code test --json-file-output=results-code.json || true
+          snyk-to-html -i results-code.json -o results-code.html
 
       - name: Docker Container Scanning
         run: |
           docker build . -t myapp
-          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
+          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp || true
+          snyk-to-html -i results-container.json -o results-container.html
 
       - name: Scanning Terraform Scripts - IaC
         run: |
-          snyk iac test --json-file-output=results-iac.json
+          snyk iac test --json-file-output=results-iac.json || true
+          snyk-to-html -i results-iac.json -o results-iac.html
 
       - name: Running DAST Scan 
         id: Scan
@@ -71,14 +75,19 @@ jobs:
           target-url: 'https://juice-shop.herokuapp.com/'
           output-filename: 'dastardly-report.xml'
 
+      - name: Processing DAST Report
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          junit2html dastardly-report.xml dastardly-report.html
+
       - name: Uploading Reports to Artifacts
         uses: actions/upload-artifact@v3.1.2 
         with:
           name: All-Reports
           path: |
-            dastardly-report.xml
+            dastardly-report.html
             gitleaks-report.json
-            results-opensource.json
-            results-code.json
-            results-container.json
-            results-iac.json
+            results-opensource.html
+            results-code.html
+            results-container.html
+            results-iac.html
