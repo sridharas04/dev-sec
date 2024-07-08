@@ -44,11 +44,11 @@ jobs:
       #     args: "--path=. --report-format=json --report-path=gitleaks-report.json"
       #   continue-on-error: true
 
-      # - name: Scanning Project Dependencies - SCA
-      #   run: |
-      #     snyk auth ${{ secrets.SNYK_TOKEN }}
-      #     snyk test --all-projects --json-file-output=results-opensource.json
-      #   continue-on-error: true
+      - name: Scanning Project Dependencies - SCA
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk test --all-projects --json-file-output=results-opensource.json
+        continue-on-error: true
 
       - name: Scanning Source Code - SAST
         run: |
