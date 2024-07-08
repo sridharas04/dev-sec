@@ -68,16 +68,20 @@ jobs:
           snyk iac test --json-file-output=results-iac.json
         continue-on-error: true
 
+      - name: Start Application Docker Container
+        run: docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
+
       - name: Running DAST Scan 
         id: Scan
         continue-on-error: true
         uses: PortSwigger/dastardly-github-action@v1.0.0
         with:
-          target-url: 'https://juice-shop.herokuapp.com/'
+          target-url: 'http://localhost:9090/'
           output-filename: 'dastardly-report.xml'
 
+
       - name: Execute Upload Script
-        run: python3 upload_to_defectdojo.py
+        run: python3 defectdojo.py
 
       - name: Uploading Reports to Artifacts
         uses: actions/upload-artifact@v3.1.2 
