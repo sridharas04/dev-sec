@@ -1,43 +1,33 @@
+import defectdojo_api
 import os
-from defectdojo_api import defectdojo
 
-# DefectDojo connection parameters
-DEFECTDOJO_URL = os.getenv('DEFECTDOJO_URL')
-DEFECTDOJO_API_KEY = os.getenv('DEFECTDOJO_API_KEY')
-ENGAGEMENT_ID = os.getenv('DEFECTDOJO_ENGAGEMENT_ID')
+defectdojo_url = os.getenv('DEFECTDOJO_URL')
+api_key = os.getenv('DEFECTDOJO_API_KEY')
+engagement_id = os.getenv('DEFECTDOJO_ENGAGEMENT_ID')
 
-# Connect to DefectDojo
-dojo = defectdojo.DefectDojoAPIv2(url=DEFECTDOJO_URL, api_token=DEFECTDOJO_API_KEY, verify_ssl=False)
+# Initialize the DefectDojo API client
+api = defectdojo_api.DefectDojoAPI(defectdojo_url, api_key, verify_ssl=False)
 
-# Upload reports
-reports = [
-    ('gitleaks', 'gitleaks-report.json', 'GitLeaks Scan'),
-    ('snyk', 'results-opensource.json', 'Snyk Open Source Scan'),
-    ('snyk', 'results-code.json', 'Snyk Code Scan'),
-    ('snyk', 'results-container.json', 'Snyk Container Scan'),
-    ('snyk', 'results-iac.json', 'Snyk IaC Scan'),
-    ('burp', 'dastardly-report.xml', 'Dastardly DAST Scan')
-]
+# Upload the reports to DefectDojo
+report_files = {
+    'dastardly-report.xml': 'Dastardly Scan',
+    'gitleaks-report.json': 'Gitleaks Secret Scan',
+    'results-opensource.json': 'Snyk SCA',
+    'results-code.json': 'Snyk SAST',
+    'results-container.json': 'Snyk Container Scan',
+    'results-iac.json': 'Snyk IaC'
+}
 
-for tool_type, file_path, title in reports:
+for file_path, scan_type in report_files.items():
     if os.path.exists(file_path):
-        response = dojo.upload_scan(
-            engagement_id=ENGAGEMENT_ID,
-            scan_type=tool_type,
-            file=file_path,
-            scan_date=None,
-            minimum_severity='Info',
+        print(f"Uploading {file_path} to DefectDojo as {scan_type} scan...")
+        api.upload_scan(
+            engagement_id,
+            scan_type,
+            file_path,
             active=True,
-            verified=False,
-            close_old_findings=False,
-            push_to_jira=False,
-            environment=None,
-            service=None,
-            tags=None,
-            close_old_findings_on_upload=False,
-            title=title
+            verified=True
         )
-        if response.success:
-            print(f'Successfully uploaded {title} report to DefectDojo.')
-        else:
-            print(f'Failed to upload {title} report to DefectDojo. Error: {response.message}')
+        print(f"{file_path} uploaded successfully.")
+    else:
+        print(f"{file_path} not found. Skipping upload.")
