@@ -6,6 +6,8 @@ api_key = os.getenv('DEFECTDOJO_API_KEY')
 engagement_id = os.getenv('DEFECTDOJO_ENGAGEMENT_ID')
 user = "admin"
 
+print(defectdojo_url,api_key,engagement_id,user)
+
 if defectdojo_url:
     # Initialize the DefectDojo API client
     api = defectdojo.DefectDojoAPI(defectdojo_url, api_key, user, verify_ssl=False)
