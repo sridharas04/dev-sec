@@ -38,6 +38,7 @@ jobs:
           npm install snyk -g
           npm install snyk-to-html -g
           pip install junit2html
+          pip install defectdojo_api
 
       - name: Gitleaks Secret Scanning
         uses: gitleaks/gitleaks-action@v2
@@ -74,6 +75,9 @@ jobs:
         with:
           target-url: 'https://juice-shop.herokuapp.com/'
           output-filename: 'dastardly-report.xml'
+
+      - name: Execute Upload Script
+        run: python3 upload_to_defectdojo.py
 
       - name: Uploading Reports to Artifacts
         uses: actions/upload-artifact@v3.1.2 
