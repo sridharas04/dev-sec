@@ -92,7 +92,7 @@ jobs:
 
       - name: Import Scan Results into DefectDojo
         id: import-scan-results-into-defectdojo
-        uses: portswigger-cloud/defectdojo-github-action@v1
+        uses: portswigger-cloud/defectdojo-active-findings@v1
         with:
           defectdojo-url: https://demo.defectdojo.org/
           defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
