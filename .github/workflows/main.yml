@@ -94,7 +94,7 @@ jobs:
         id: import-scan-results-into-defectdojo
         uses: portswigger-cloud/defectdojo-active-findings@v1
         with:
-          defectdojo-url: 'https://demo.defectdojo.org/''
+          defectdojo-url: 'https://demo.defectdojo.org/'
           defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
           defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
           defectdojo-product-type: 'Commerce'
