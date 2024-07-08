@@ -37,7 +37,6 @@ jobs:
           npm install bcryptjs@latest 
           npm install snyk -g
           npm install snyk-to-html -g
-          pip install defectdojo_api
 
       - name: Gitleaks Secret Scanning
         uses: gitleaks/gitleaks-action@v2
@@ -91,9 +90,62 @@ jobs:
             results-container.json
             results-iac.json
 
-      - name: Upload Reports to DefectDojo
-        run: python3 defectdojo.py
-        env:
-          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
-          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
-          DEFECTDOJO_ENGAGEMENT_ID: ${{ secrets.DEFECTDOJO_ENGAGEMENT_ID }}
+      - name: Import Snyk SCA Report to DefectDojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}    
+          engagement_id: '14'                                      
+          file_path: 'results-opensource.json'                     
+          scan_type: 'Snyk SCA'                                   
+          scan_date: '2024-07-08'                                 
+          environment: 'Development'                              
+          verified: 'true'                                         
+
+      - name: Import Snyk SAST Report to DefectDojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
+          engagement_id: '14'
+          file_path: 'results-code.json'
+          scan_type: 'Snyk SAST'
+          scan_date: '2024-07-08'
+          environment: 'Development'
+          verified: 'true'
+
+      - name: Import Snyk Container Scan Report to DefectDojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
+          engagement_id: '14'
+          file_path: 'results-container.json'
+          scan_type: 'Snyk Container Scan'
+          scan_date: '2024-07-08'
+          environment: 'Development'
+          verified: 'true'
+
+      - name: Import Snyk IaC Report to DefectDojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
+          engagement_id: '14'
+          file_path: 'results-iac.json'
+          scan_type: 'Snyk IaC'
+          scan_date: '2024-07-08'
+          environment: 'Development'
+          verified: 'true'
+
+      - name: Import DAST Scan Report to DefectDojo
+        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+        with:
+          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
+          engagement_id: '14'
+          file_path: 'dastardly-report.xml'
+          scan_type: 'DAST Scan'
+          scan_date: '2024-07-08'
+          environment: 'Development'
+          verified: 'true'
