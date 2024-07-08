@@ -37,7 +37,6 @@ jobs:
           npm install bcryptjs@latest 
           npm install snyk -g
           npm install snyk-to-html -g
-          pip install junit2html
           pip install defectdojo_api
 
       - name: Gitleaks Secret Scanning
@@ -68,8 +67,9 @@ jobs:
           snyk iac test --json-file-output=results-iac.json
         continue-on-error: true
 
-      - name: Start Application Docker Container
-        run: docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
+      - name: Run Application
+        run: |
+          docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
 
       - name: Running DAST Scan 
         id: Scan
@@ -78,10 +78,6 @@ jobs:
         with:
           target-url: 'http://localhost:9090/'
           output-filename: 'dastardly-report.xml'
-
-
-      - name: Execute Upload Script
-        run: python3 defectdojo.py
 
       - name: Uploading Reports to Artifacts
         uses: actions/upload-artifact@v3.1.2 
@@ -94,3 +90,10 @@ jobs:
             results-code.json
             results-container.json
             results-iac.json
+
+      - name: Upload Reports to DefectDojo
+        run: python3 defectdojo.py
+        env:
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_ENGAGEMENT_ID: ${{ secrets.DEFECTDOJO_ENGAGEMENT_ID }}
