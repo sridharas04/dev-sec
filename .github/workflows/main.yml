@@ -44,16 +44,16 @@ jobs:
       #     args: "--path=. --report-format=json --report-path=gitleaks-report.json"
       #   continue-on-error: true
 
-      - name: Scanning Project Dependencies - SCA
-        run: |
-          snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk test --all-projects --json-file-output=results-opensource.json
-        continue-on-error: true
-
-      # - name: Scanning Source Code - SAST
+      # - name: Scanning Project Dependencies - SCA
       #   run: |
-      #     snyk code test --json-file-output=results-code.json
+      #     snyk auth ${{ secrets.SNYK_TOKEN }}
+      #     snyk test --all-projects --json-file-output=results-opensource.json
       #   continue-on-error: true
+
+      - name: Scanning Source Code - SAST
+        run: |
+          snyk code test --json-file-output=results-code.json
+        continue-on-error: true
 
       # - name: Docker Container Scanning
       #   run: |
@@ -90,62 +90,17 @@ jobs:
       #       results-container.json
       #       results-iac.json
 
-      - name: Import Snyk SCA Report to DefectDojo
-        uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
+      - name: Import Scan Results into DefectDojo
+        id: import-scan-results-into-defectdojo
+        uses: portswigger-cloud/defectdojo-github-action@v1
         with:
-          defectdojo_base_url: 'https://demo.defectdojo.org/'
-          defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}    
-          engagement_id: '14'                                      
-          file_path: 'results-opensource.json'                     
-          scan_type: 'Snyk SCA'                                   
-          scan_date: '2024-07-08'                                 
-          environment: 'Development'                              
-          verified: 'true'                                         
+          defectdojo-url: https://demo.defectdojo.org/
+          defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
+          defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
+          defectdojo-product-type: Commerce
+          defectdojo-product: CICD Devsecops test
+          defectdojo-environment-type: Production
+          defectdojo-scan-type: Snyk Report
+          defectdojo-engagement-name: Github Actions Initiated SAST Scan
+          scan-results-file-name: results-code.json
 
-      # - name: Import Snyk SAST Report to DefectDojo
-      #   uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
-      #   with:
-      #     defectdojo_base_url: 'https://demo.defectdojo.org/'
-      #     defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
-      #     engagement_id: '14'
-      #     file_path: 'results-code.json'
-      #     scan_type: 'Snyk SAST'
-      #     scan_date: '2024-07-08'
-      #     environment: 'Development'
-      #     verified: 'true'
-
-      # - name: Import Snyk Container Scan Report to DefectDojo
-      #   uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
-      #   with:
-      #     defectdojo_base_url: 'https://demo.defectdojo.org/'
-      #     defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
-      #     engagement_id: '14'
-      #     file_path: 'results-container.json'
-      #     scan_type: 'Snyk Container Scan'
-      #     scan_date: '2024-07-08'
-      #     environment: 'Development'
-      #     verified: 'true'
-
-      # - name: Import Snyk IaC Report to DefectDojo
-      #   uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
-      #   with:
-      #     defectdojo_base_url: 'https://demo.defectdojo.org/'
-      #     defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
-      #     engagement_id: '14'
-      #     file_path: 'results-iac.json'
-      #     scan_type: 'Snyk IaC'
-      #     scan_date: '2024-07-08'
-      #     environment: 'Development'
-      #     verified: 'true'
-
-      # - name: Import DAST Scan Report to DefectDojo
-      #   uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
-      #   with:
-      #     defectdojo_base_url: 'https://demo.defectdojo.org/'
-      #     defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
-      #     engagement_id: '14'
-      #     file_path: 'dastardly-report.xml'
-      #     scan_type: 'DAST Scan'
-      #     scan_date: '2024-07-08'
-      #     environment: 'Development'
-      #     verified: 'true'
