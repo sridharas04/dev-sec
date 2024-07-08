@@ -93,7 +93,7 @@ jobs:
       - name: Import Snyk SCA Report to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
         with:
-          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_base_url: 'https://demo.defectdojo.org/'
           defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}    
           engagement_id: '14'                                      
           file_path: 'results-opensource.json'                     
@@ -105,7 +105,7 @@ jobs:
       - name: Import Snyk SAST Report to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
         with:
-          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_base_url: 'https://demo.defectdojo.org/'
           defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
           engagement_id: '14'
           file_path: 'results-code.json'
@@ -117,7 +117,7 @@ jobs:
       - name: Import Snyk Container Scan Report to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
         with:
-          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_base_url: 'https://demo.defectdojo.org/'
           defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
           engagement_id: '14'
           file_path: 'results-container.json'
@@ -129,7 +129,7 @@ jobs:
       - name: Import Snyk IaC Report to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
         with:
-          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_base_url: 'https://demo.defectdojo.org/'
           defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
           engagement_id: '14'
           file_path: 'results-iac.json'
@@ -141,7 +141,7 @@ jobs:
       - name: Import DAST Scan Report to DefectDojo
         uses: portswigger-cloud/defectdojo-import-scan@v1.0.1
         with:
-          defectdojo_base_url: https://demo.defectdojo.org/
+          defectdojo_base_url: 'https://demo.defectdojo.org/'
           defectdojo_api_key: ${{ secrets.DEFECTDOJO_API_KEY }}
           engagement_id: '14'
           file_path: 'dastardly-report.xml'
