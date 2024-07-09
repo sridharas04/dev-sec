@@ -38,22 +38,22 @@ jobs:
           npm install snyk -g
           npm install snyk-to-html -g
 
-      # - name: Gitleaks Secret Scanning
-      #   uses: gitleaks/gitleaks-action@v2
-      #   with:
-      #     args: "--path=. --report-format=json --report-path=gitleaks-report.json"
+      - name: Gitleaks Secret Scanning
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: "--path=. --report-format=json --report-path=gitleaks-report.json"
+        continue-on-error: true
+
+      # - name: Scanning Project Dependencies - SCA
+      #   run: |
+      #     snyk auth ${{ secrets.SNYK_TOKEN }}
+      #     snyk test --all-projects --json-file-output=results-opensource.json
       #   continue-on-error: true
 
-      - name: Scanning Project Dependencies - SCA
-        run: |
-          snyk auth ${{ secrets.SNYK_TOKEN }}
-          snyk test --all-projects --json-file-output=results-opensource.json
-        continue-on-error: true
-
-      - name: Scanning Source Code - SAST
-        run: |
-          snyk code test --json-file-output=results-code.json
-        continue-on-error: true
+      # - name: Scanning Source Code - SAST
+      #   run: |
+      #     snyk code test --json-file-output=results-code.json
+      #   continue-on-error: true
 
       # - name: Docker Container Scanning
       #   run: |
@@ -78,29 +78,15 @@ jobs:
       #     target-url: 'http://localhost:9090/'
       #     output-filename: 'dastardly-report.xml'
 
-      # - name: Uploading Reports to Artifacts
-      #   uses: actions/upload-artifact@v3.1.2 
-      #   with:
-      #     name: All-Reports
-      #     path: |
-      #       dastardly-report.xml
-      #       gitleaks-report.json
-      #       results-opensource.json
-      #       results-code.json
-      #       results-container.json
-      #       results-iac.json
-
-      - name: Import Scan Results into DefectDojo
-        id: import-scan-results-into-defectdojo
-        uses: portswigger-cloud/defectdojo-active-findings@v1
+      - name: Uploading Reports to Artifacts
+        uses: actions/upload-artifact@v3.1.2 
         with:
-          defectdojo-url: 'https://demo.defectdojo.org/'
-          defectdojo-username: ${{ secrets.DEFECTDOJO_USERNAME }}
-          defectdojo-password: ${{ secrets.DEFECTDOJO_PASSWORD }}
-          defectdojo-product-type: 'Commerce'
-          defectdojo-product: 'CICD Devsecops test'
-          defectdojo-environment-type: 'Production'
-          defectdojo-scan-type: 'Snyk Code Scan'
-          defectdojo-engagement-name: 'Snyk code scan'
-          scan-results-file-name: 'results-code.json'
+          name: All-Reports
+          path: |
+#            dastardly-report.xml
+            gitleaks-report.json
+#            results-opensource.json
+#            results-code.json
+#            results-container.json
+#            results-iac.json
 
