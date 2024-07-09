@@ -41,7 +41,7 @@ jobs:
       - name: Gitleaks Secret Scanning
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: "--path=. --report-format=json --report-path=gitleaks-report.json"
+          args: detect --report-format=json --report-path=gitleaks-report.json
         continue-on-error: true
 
       # - name: Scanning Project Dependencies - SCA
