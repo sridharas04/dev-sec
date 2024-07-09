@@ -62,6 +62,8 @@ if __name__ == "__main__":
     defectdojo_api_key = os.getenv('DEFECTDOJO_API_KEY')
     product_id = int(os.getenv('DEFECTDOJO_PRODUCT_ID'))
 
+    print(defectdojo_url,defectdojo_api_key,product_id)
+
     engagement_id = create_engagement(defectdojo_url, defectdojo_api_key, product_id)
 
     report_files = {
