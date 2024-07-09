@@ -90,17 +90,17 @@ jobs:
         with:
           name: All-Reports
           path: |
-           gitleaks-report.json
-           dastardly-report.xml
-           results-opensource.json
-           results-code.json
-           results-container.json
-           results-iac.json
-      - name: Execute DefectDojo script
-      run: |
-        python defect-dojo.py
-      env:
-        DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
-        DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
-        DEFECTDOJO_PRODUCT_ID: ${{ secrets.DEFECTDOJO_PRODUCT_ID }}
+            gitleaks-report.json
+            dastardly-report.xml
+            results-opensource.json
+            results-code.json
+            results-container.json
+            results-iac.json
 
+      - name: Execute DefectDojo script
+        run: |
+          python defect-dojo.py
+        env:
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEECTDOJO_API_KEY }}
+          DEFECTDOJO_PRODUCT_ID: ${{ secrets.DEFECTDOJO_PRODUCT_ID }}
