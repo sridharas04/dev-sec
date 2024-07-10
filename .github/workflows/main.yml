@@ -92,8 +92,7 @@ jobs:
           iac_version: 'v14'
           policy_type: 'aws'
           only_warn: true
-          output: 'json'
-          log_output_dir: './terrascan-output'
+          args: '--output json --log-output-dir ./terrascan-output'
         continue-on-error: true
 
       - name: Move Terrascan Output
