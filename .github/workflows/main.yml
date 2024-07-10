@@ -86,8 +86,8 @@ jobs:
 
       - name: Run Terrascan
         run: |
-          wget -q https://github.com/tenable/terrascan/releases/download/v1.19.1/terrascan_1.19.1_Linux_x86_64.tar.gz
-          gunzip terrascan_1.19.1_Linux_x86_64.tar.gz
+          curl -L https://github.com/tenable/terrascan/releases/download/v1.19.1/terrascan_1.19.1_Linux_x86_64.tar.gz -o terrascan.tar.gz
+          gunzip terrascan.tar.gz
           tar -xvf terrascan_1.19.1_Linux_x86_64.tar terrascan
           chmod +x terrascan
           sudo mv terrascan /usr/local/bin/
