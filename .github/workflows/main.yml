@@ -86,12 +86,12 @@ jobs:
 
       - name: Run Terrascan
         run: |
-          curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_linux_amd64.tar.gz")" > terrascan.tar.gz
+          TERRASCAN_URL=$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep browser_download_url | grep linux_amd64.tar.gz | cut -d '"' -f 4)
+          curl -L $TERRASCAN_URL -o terrascan.tar.gz
           tar -xf terrascan.tar.gz terrascan && rm terrascan.tar.gz
           install terrascan /usr/local/bin && rm terrascan
           terrascan scan -t aws -i terraform -o json > terrascan-report.json
         continue-on-error: true
-
 
 
       # - name: Run Application
