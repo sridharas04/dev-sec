@@ -66,7 +66,7 @@ if __name__ == "__main__":
 
     report_files = {
         'dastardly-report.xml': 'Burp Dastardly Scan',
-        'gitleaks-report.sarif': 'Gitleaks Scan',
+        'gitleaks-report.json': 'Gitleaks Scan',
         'results-opensource.json': 'Snyk Scan',
         'results-code.json': 'Snyk Code Scan',
         'results-container.json': 'Snyk Scan',
