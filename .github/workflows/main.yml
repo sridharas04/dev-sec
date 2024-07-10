@@ -90,7 +90,7 @@ jobs:
           tar -xzf terrascan.tar.gz
           chmod +x terrascan
           sudo mv terrascan /usr/local/bin/
-          errascan scan -t aws -i terraform -o json --log-level info --log-type console > terrascan-report.json
+          terrascan scan -t aws -i terraform -o json --log-level info --log-type console > terrascan-report.json
         continue-on-error: true
 
       # - name: Run Application
