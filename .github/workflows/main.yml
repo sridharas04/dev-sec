@@ -68,9 +68,20 @@ jobs:
           snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
         continue-on-error: true
 
-      - name: Scanning Terraform Scripts - IaC
-        run: |
-          snyk iac test --json-file-output=results-iac.json
+      # - name: Scanning Terraform Scripts - IaC
+      #   run: |
+      #     snyk iac test --json-file-output=results-iac.json
+      #   continue-on-error: true
+
+      - name: Run Terrascan
+        id: terrascan
+        uses: tenable/terrascan-action@v1.14.1
+        with:
+          iac_type: 'terraform'
+          iac_version: 'v14'
+          policy_type: 'aws'
+          only_warn: true
+          sarif_upload: true
         continue-on-error: true
 
       - name: Run Application
@@ -95,7 +106,7 @@ jobs:
             results-opensource.json
             results-code.json
             results-container.json
-            results-iac.json
+            terrascan.sarif
 
       - name: Execute DefectDojo script
         run: |

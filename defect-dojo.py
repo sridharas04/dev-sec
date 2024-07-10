@@ -70,7 +70,7 @@ if __name__ == "__main__":
         'results-opensource.json': 'Snyk Scan',
         'results-code.json': 'Snyk Code Scan',
         'results-container.json': 'Snyk Scan',
-        'results-iac.json': 'Snyk Scan'
+        'terrascan.sarif': 'Terrascan Scan'
     }
 
     for file_path, scan_type in report_files.items():
