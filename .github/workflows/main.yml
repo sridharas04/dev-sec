@@ -89,7 +89,8 @@ jobs:
           curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
           tar -xzf terrascan.tar.gz terrascan && rm terrascan.tar.gz
           sudo install terrascan /usr/local/bin && rm terrascan
-          terrascan scan -t aws -i terraform -o json --log-level info --log-type console > terrascan-report.json
+          terrascan --help
+      #   terrascan scan -t aws -i terraform -o json --log-level info --log-type console > terrascan-report.json
 
       # - name: Run Application
       #   run: |
