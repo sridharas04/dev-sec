@@ -89,8 +89,7 @@ jobs:
           curl -L -o terrascan.tar.gz https://github.com/tenable/terrascan/releases/download/v1.19.1/terrascan_1.19.1_Linux_x86_64.tar.gz
           tar -xzf terrascan.tar.gz
           chmod +x terrascan
-          sudo mv terrascan /usr/local/bin/
-          terrascan scan -t aws -i terraform -o json --log-level info --log-type console > terrascan-report.json
+          ./terrascan scan -t aws -i terraform -o json --log-level info --log-type console > terrascan-report.json
         continue-on-error: true
 
       # - name: Run Application
