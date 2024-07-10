@@ -85,19 +85,10 @@ jobs:
       #   continue-on-error: true
 
       - name: Run Terrascan
-        id: terrascan
-        uses: tenable/terrascan-action@main
-        with:
-          iac_type: 'terraform'
-          iac_version: 'v14'
-          policy_type: 'aws'
-          only_warn: true
-          args: '--output json --log-output-dir ./terrascan-output'
-        continue-on-error: true
+        run: |
+          curl -L https://github.com/tenable/terrascan/releases/download/v1.14.1/terrascan_1.14.1_linux_amd64.tar.gz | tar -xz
+          ./terrascan scan -t aws -i terraform -o json > terrascan-report.json
 
-      - name: Move Terrascan Output
-        run: mv ./terrascan-output/terrascan-output.json ./terrascan-report.json
-        continue-on-error: true
 
       # - name: Run Application
       #   run: |
