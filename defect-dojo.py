@@ -62,21 +62,19 @@ if __name__ == "__main__":
     defectdojo_api_key = os.getenv('DEFECTDOJO_API_KEY')
     product_id = int(os.getenv('DEFECTDOJO_PRODUCT_ID'))
 
-    print(defectdojo_url,defectdojo_api_key,product_id)
+    engagement_id = create_engagement(defectdojo_url, defectdojo_api_key, product_id)
 
-    # engagement_id = create_engagement(defectdojo_url, defectdojo_api_key, product_id)
+    report_files = {
+        'dastardly-report.xml': 'Burp Dastardly Scan',
+        'gitleaks-report.sarif': 'Gitleaks Scan',
+        'results-opensource.json': 'Snyk Scan',
+        'results-code.json': 'Snyk Code Scan',
+        'results-container.json': 'Snyk Scan',
+        'results-iac.json': 'Snyk Scan'
+    }
 
-    # report_files = {
-    #     'dastardly-report.xml': 'Burp Dastardly Scan',
-    #     'gitleaks-report.sarif': 'Gitleaks Scan',
-    #     'results-opensource.json': 'Snyk Scan',
-    #     'results-code.json': 'Snyk Code Scan',
-    #     'results-container.json': 'Snyk Scan',
-    #     'results-iac.json': 'Snyk Scan'
-    # }
-
-    # for file_path, scan_type in report_files.items():
-    #     if os.path.exists(file_path):
-    #         import_scan_results(defectdojo_url, defectdojo_api_key, engagement_id, file_path, scan_type)
-    #     else:
-    #         print(f"{file_path} not found. Skipping upload.")
+    for file_path, scan_type in report_files.items():
+        if os.path.exists(file_path):
+            import_scan_results(defectdojo_url, defectdojo_api_key, engagement_id, file_path, scan_type)
+        else:
+            print(f"{file_path} not found. Skipping upload.")
