@@ -90,7 +90,7 @@ jobs:
           tar -xzf terrascan.tar.gz terrascan && rm terrascan.tar.gz
           sudo install terrascan /usr/local/bin && rm terrascan
           terrascan --help
-          terrascan scan -t aws -i terraform -o json > terrascan-report.json
+          terrascan scan -t aws -i -d terraform terraform -o json > terrascan-report.json
         continue-on-error: true
 
       - name: Run Application
