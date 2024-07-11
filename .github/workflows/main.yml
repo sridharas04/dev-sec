@@ -24,65 +24,65 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # - name: Setup Node
-      #   uses: actions/setup-node@v2
-      #   with:
-      #     node-version: '12'
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
       
-      # - name: Install Project Dependencies
-      #   run: |
-      #     npm cache clean --force
-      #     npm install 
-      #     npm install bcrypt@latest 
-      #     npm install bcryptjs@latest 
-      #     npm install snyk -g
-      #     npm install snyk-to-html -g
+      - name: Install Project Dependencies
+        run: |
+          npm cache clean --force
+          npm install 
+          npm install bcrypt@latest 
+          npm install bcryptjs@latest 
+          npm install snyk -g
+          npm install snyk-to-html -g
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     python-version: '3.x'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-      # - name: Run Gitleaks
-      #   id: gitleaks
-      #   run: |
-      #     pip install requests
-      #     curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.16.1/gitleaks_8.16.1_linux_x64.tar.gz | tar -xz
-      #     ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json --redact --log-opts=-1
-      #   continue-on-error: true
+      - name: Run Gitleaks
+        id: gitleaks
+        run: |
+          pip install requests
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.16.1/gitleaks_8.16.1_linux_x64.tar.gz | tar -xz
+          ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json --redact --log-opts=-1
+        continue-on-error: true
 
-      # - name: Scanning Project Dependencies - SCA
-      #   run: |
-      #     snyk auth ${{ secrets.SNYK_TOKEN }}
-      #     snyk test --all-projects --json-file-output=results-opensource.json
-      #   continue-on-error: true
+      - name: Scanning Project Dependencies - SCA
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          snyk test --all-projects --json-file-output=results-opensource.json
+        continue-on-error: true
 
-      # - name: Scanning Source Code - SAST
-      #   run: |
-      #     snyk code test --json-file-output=results-code.json
-      #   continue-on-error: true
+      - name: Scanning Source Code - SAST
+        run: |
+          snyk code test --json-file-output=results-code.json
+        continue-on-error: true
 
-      # - name: Docker Container Scanning
-      #   run: |
-      #     docker build . -t myapp
-      #     snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
-      #   continue-on-error: true
+      - name: Docker Container Scanning
+        run: |
+          docker build . -t myapp
+          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
+        continue-on-error: true
 
-      # - name: Scanning Terraform Scripts - IaC
-      #   run: |
-      #     snyk iac test --json-file-output=results-iac.json
-      #   continue-on-error: true
+      - name: Scanning Terraform Scripts - IaC
+        run: |
+          snyk iac test --json-file-output=results-iac.json
+        continue-on-error: true
 
-      # - name: Run Terrascan
-      #   id: terrascan
-      #   uses: tenable/terrascan-action@main
-      #   with:
-      #     iac_type: 'terraform'
-      #     iac_version: 'v14'
-      #     policy_type: 'aws'
-      #     only_warn: true
-      #     output: 'json'
-      #   continue-on-error: true
+      - name: Run Terrascan
+        id: terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: 'terraform'
+          iac_version: 'v14'
+          policy_type: 'aws'
+          only_warn: true
+          output: 'json'
+        continue-on-error: true
 
       - name: Terrascan 
         run: |
@@ -90,37 +90,38 @@ jobs:
           tar -xzf terrascan.tar.gz terrascan && rm terrascan.tar.gz
           sudo install terrascan /usr/local/bin && rm terrascan
           terrascan --help
-          terrascan scan -t aws -i terraform -o json
+          terrascan scan -t aws -i terraform -o json > terrascan-report.json
+        continue-on-error: true
 
-      # - name: Run Application
-      #   run: |
-      #     docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
+      - name: Run Application
+        run: |
+          docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
 
-      # - name: Running DAST Scan 
-      #   id: Scan
-      #   continue-on-error: true
-      #   uses: PortSwigger/dastardly-github-action@v1.0.0
-      #   with:
-      #     target-url: 'http://localhost:9090/'
-      #     output-filename: 'dastardly-report.xml'
+      - name: Running DAST Scan 
+        id: Scan
+        continue-on-error: true
+        uses: PortSwigger/dastardly-github-action@v1.0.0
+        with:
+          target-url: 'http://localhost:9090/'
+          output-filename: 'dastardly-report.xml'
 
-      # - name: Uploading Reports to Artifacts
-      #   uses: actions/upload-artifact@v3.1.2 
-      #   with:
-      #     name: All-Reports
-      #     path: |
-      #       gitleaks-report.json
-      #       dastardly-report.xml
-      #       results-opensource.json
-      #       results-code.json
-      #       results-container.json
-      #       terrascan.sarif
+      - name: Uploading Reports to Artifacts
+        uses: actions/upload-artifact@v3.1.2 
+        with:
+          name: All-Reports
+          path: |
+            gitleaks-report.json
+            dastardly-report.xml
+            results-opensource.json
+            results-code.json
+            results-container.json
+            terrascan.sarif
 
-      # - name: Execute DefectDojo script
-      #   run: |
-      #     python defect-dojo.py
-      #   continue-on-error: true
-      #   env:
-      #     DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
-      #     DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
-      #     DEFECTDOJO_PRODUCT_ID: ${{ secrets.DEFECTDOJO_PRODUCT_ID }}
+      - name: Execute DefectDojo script
+        run: |
+          python defect-dojo.py
+        continue-on-error: true
+        env:
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_PRODUCT_ID: ${{ secrets.DEFECTDOJO_PRODUCT_ID }}
