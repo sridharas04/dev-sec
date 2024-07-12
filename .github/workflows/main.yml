@@ -64,8 +64,8 @@ jobs:
 
       - name: Docker Container Scanning
         run: |
-          docker build . -t myapp
-          snyk container test --file=Dockerfile --json-file-output=results-container.json myapp
+          docker pull hello-world
+          snyk container test --file=Dockerfile --json-file-output=results-container.json hello-world
         continue-on-error: true
 
       - name: Scanning Terraform Scripts - IaC
@@ -95,7 +95,8 @@ jobs:
 
       - name: Run Application
         run: |
-          docker run --name dvna -p 9090:9090 -d appsecco/dvna:sqlite && sleep 5
+          docker pull appsecco/dsvw
+          docker run -p 9090:8000 -it appsecco/dsvw && sleep 5
 
       - name: Running DAST Scan 
         id: Scan
@@ -114,8 +115,8 @@ jobs:
             dastardly-report.xml
             results-opensource.json
             results-code.json
+            terrascan-report.json
             results-container.json
-            terrascan.sarif
 
       - name: Execute DefectDojo script
         run: |
