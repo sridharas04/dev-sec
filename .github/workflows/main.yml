@@ -96,7 +96,7 @@ jobs:
       - name: Run Application
         run: |
           docker pull appsecco/dsvw
-          docker run -p 9090:8000 -it appsecco/dsvw && sleep 5
+          docker run -p 9090:8000 -it -d appsecco/dsvw && sleep 5
 
       - name: Running DAST Scan 
         id: Scan
