@@ -68,24 +68,13 @@ jobs:
           snyk container test --file=Dockerfile --json-file-output=results-container.json hello-world
         continue-on-error: true
 
-      - name: Run Terrascan
-        id: terrascan
-        uses: tenable/terrascan-action@main
-        with:
-          iac_type: 'terraform'
-          iac_version: 'v14'
-          policy_type: 'aws'
-          only_warn: true
-          output: 'json'
-        continue-on-error: true
-
       - name: Terrascan 
         run: |
           curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
           tar -xzf terrascan.tar.gz terrascan && rm terrascan.tar.gz
           sudo install terrascan /usr/local/bin && rm terrascan
           terrascan --help
-          terrascan scan -t aws -i -d terraform terraform -o json > terrascan-report.json
+          terrascan scan -t aws -i terraform -o json -d terraform > terrascan-report.json
         continue-on-error: true
 
       - name: Run Application
