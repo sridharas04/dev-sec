@@ -64,7 +64,7 @@ jobs:
 
       - name: Install Docker Slim
         run: |
-          curl -sL https://github.com/docker-slim/docker-slim/releases/download/1.39.0/dist_linux.tar.gz -o docker-slim.tar.gz
+          curl -sL https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz -o docker-slim.tar.gz
           tar -xzf docker-slim.tar.gz
           sudo mv dist_linux/slim /usr/local/bin/
           sudo mv dist_linux/slim-sensor /usr/local/bin/
