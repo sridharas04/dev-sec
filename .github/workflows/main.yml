@@ -72,8 +72,8 @@ jobs:
 
       - name: Optimize Docker Image with Docker Slim
         run: |
-          docker build -t myapp
-          slim build --target myapp:latest
+          docker build -t myapp .
+          slim build --target myapp
 
       - name: Docker Container Scanning
         run: |
