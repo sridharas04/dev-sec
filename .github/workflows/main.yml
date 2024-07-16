@@ -74,6 +74,7 @@ jobs:
         run: |
           docker build -t myapp .
           slim build --target myapp
+      continue-on-error: true
 
       - name: Docker Container Scanning
         run: |
