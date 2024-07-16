@@ -23,14 +23,12 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # Fetch the last 2 commits to compare changes
 
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: '12'
-
+      
       - name: Install Project Dependencies
         run: |
           npm cache clean --force
@@ -53,15 +51,15 @@ jobs:
           ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json --redact --log-opts=-1
         continue-on-error: true
 
-      - name: Scanning Project Dependencies - SCA (Incremental)
+      - name: Scanning Project Dependencies - SCA
         run: |
           snyk auth ${{ secrets.SNYK_TOKEN }}
-          git diff --name-only HEAD^ HEAD | grep -E '\.(js|json)$' | xargs -I {} snyk test --file={} --json-file-output=results-opensource.json
+          snyk test --all-projects --json-file-output=results-opensource.json
         continue-on-error: true
 
-      - name: Scanning Source Code - SAST (Incremental)
+      - name: Scanning Source Code - SAST
         run: |
-          git diff --name-only HEAD^ HEAD | grep -E '\.(js|ts|tsx|json)$' | xargs -I {} snyk code test --file={} --json-file-output=results-code.json
+          snyk code test --json-file-output=results-code.json
         continue-on-error: true
 
       - name: Install Docker Slim
