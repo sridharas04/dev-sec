@@ -73,12 +73,12 @@ jobs:
       - name: Optimize Docker Image with Docker Slim
         run: |
           docker build -t myapp .
-          slim build --target myapp
-          docker images
+          slim build --target myapp --http-probe=false
         continue-on-error: true
 
-      # - name: Docker Container Scanning
-      #   run: |
+      - name: Docker Container Scanning
+        run: |
+          docker images
       #     snyk container test --file=Dockerfile --json-file-output=results-container.json --exclude-app-vulns myapp.slim
       #   continue-on-error: true
 
