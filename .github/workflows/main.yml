@@ -1,0 +1,124 @@
+name: CI/CD DevSecOps Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
+      
+      - name: Install Project Dependencies
+        run: |
+          npm cache clean --force
+          npm install 
+          npm install bcrypt@latest 
+          npm install bcryptjs@latest 
+          npm install snyk -g
+          npm install snyk-to-html -g
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run Gitleaks
+        id: gitleaks
+        run: |
+          pip install requests
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.16.1/gitleaks_8.16.1_linux_x64.tar.gz | tar -xz
+          ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json --redact --log-opts=-1
+        continue-on-error: true
+
+      - name: Scanning Project Dependencies - SCA (Incremental)
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
+          git diff --name-only HEAD^ HEAD | grep -E '\.(js|json)$' | xargs -I {} snyk test --file={} --json-file-output=results-opensource.json
+        continue-on-error: true
+
+      - name: Scanning Source Code - SAST (Incremental)
+        run: |
+          git diff --name-only HEAD^ HEAD | grep -E '\.(js|ts|tsx|json)$' | xargs -I {} snyk code test --file={} --json-file-output=results-code.json
+        continue-on-error: true
+
+      - name: Install Docker Slim
+        run: |
+          curl -sL https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz -o docker-slim.tar.gz
+          tar -xzf docker-slim.tar.gz
+          sudo mv dist_linux/slim /usr/local/bin/
+          sudo mv dist_linux/slim-sensor /usr/local/bin/
+          rm -rf dist_linux docker-slim.tar.gz
+
+      - name: Optimize Docker Image with Docker Slim
+        run: |
+          docker build -t myapp .
+          slim build --target myapp --http-probe=false
+        continue-on-error: true
+
+      - name: Docker Container Scanning
+        run: |
+          snyk container test --file=Dockerfile --json-file-output=results-container.json --exclude-app-vulns myapp.slim
+        continue-on-error: true
+
+      - name: Terrascan 
+        run: |
+          curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
+          tar -xzf terrascan.tar.gz terrascan && rm terrascan.tar.gz
+          sudo install terrascan /usr/local/bin && rm terrascan
+          terrascan scan -t aws -i terraform -o json -d terraform > terrascan-report.json
+        continue-on-error: true
+
+      - name: Run Application
+        run: |
+          docker pull appsecco/dsvw
+          docker run -p 9090:8000 -it -d appsecco/dsvw && sleep 5
+
+      - name: Running DAST Scan 
+        id: Scan
+        continue-on-error: true
+        uses: PortSwigger/dastardly-github-action@v1.0.0
+        with:
+          target-url: 'http://localhost:9090/'
+          output-filename: 'dastardly-report.xml'
+
+      - name: Uploading Reports to Artifacts
+        uses: actions/upload-artifact@v3.1.2 
+        with:
+          name: All-Reports
+          path: |
+            gitleaks-report.json
+            dastardly-report.xml
+            results-opensource.json
+            results-code.json
+            terrascan-report.json
+            results-container.json
+
+      - name: Execute DefectDojo script
+        run: |
+          python defect-dojo.py
+        continue-on-error: true
+        env:
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+          DEFECTDOJO_PRODUCT_ID: ${{ secrets.DEFECTDOJO_PRODUCT_ID }}
