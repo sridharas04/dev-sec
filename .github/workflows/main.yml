@@ -62,21 +62,23 @@ jobs:
           snyk code test --json-file-output=results-code.json
         continue-on-error: true
 
+      - name: Install Docker Slim
+        run: |
+          curl -sL https://github.com/docker-slim/docker-slim/releases/download/1.39.0/dist_linux.tar.gz -o docker-slim.tar.gz
+          tar -xzf docker-slim.tar.gz
+          sudo mv dist_linux/slim /usr/local/bin/
+          sudo mv dist_linux/slim-sensor /usr/local/bin/
+          rm -rf dist_linux docker-slim.tar.gz
+
+      - name: Optimize Docker Image with Docker Slim
+        run: |
+          docker build -t myapp
+          slim build --target myapp:latest
+
       - name: Docker Container Scanning
         run: |
-          docker pull hello-world
-          snyk container test --file=Dockerfile --json-file-output=results-container.json hello-world
-        continue-on-error: true
-
-      - name: Run Terrascan
-        id: terrascan
-        uses: tenable/terrascan-action@main
-        with:
-          iac_type: 'terraform'
-          iac_version: 'v14'
-          policy_type: 'aws'
-          only_warn: true
-          output: 'json'
+          curl -sL https://github.com/slimtoolkit/slim/releases/download/1.40.11/dist_linux.tar.gz -o docker-slim.tar.gz
+          snyk container test --file=Dockerfile --json-file-output=results-container.json --exclude-app-vulns myapp.slim
         continue-on-error: true
 
       - name: Terrascan 
@@ -84,7 +86,6 @@ jobs:
           curl -L "$(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest | grep -o -E "https://.+?_Linux_x86_64.tar.gz")" > terrascan.tar.gz
           tar -xzf terrascan.tar.gz terrascan && rm terrascan.tar.gz
           sudo install terrascan /usr/local/bin && rm terrascan
-          terrascan --help
           terrascan scan -t aws -i -d terraform terraform -o json > terrascan-report.json
         continue-on-error: true
 
