@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run Gitleaks
+      - name: Run Gitleaks (Incremental)
         id: gitleaks
         run: |
           pip install requests
