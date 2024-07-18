@@ -71,6 +71,8 @@ jobs:
       - name: Container Scan
         run: |
           snyk container test --file=Dockerfile --json-file-output=results-container.json --exclude-app-vulns myapp.slim
+          # Preparing the container for DAST
+          docker run -p 9090:9090 -it -d myapp.slim && sleep 5
         continue-on-error: true
 
       - name: IaC Scan
@@ -82,9 +84,6 @@ jobs:
         continue-on-error: true
 
       - name: DAST Scan
-        run: |
-          docker pull appsecco/dsvw
-          docker run -p 9090:8000 -it -d appsecco/dsvw && sleep 5
         continue-on-error: true
         uses: PortSwigger/dastardly-github-action@v1.0.0
         with:
