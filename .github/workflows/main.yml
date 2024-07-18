@@ -26,9 +26,6 @@ jobs:
 
       - name: Setup Environment
         run: |
-          # Setup Node.js
-          curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
-          sudo apt-get install -y nodejs
           # Setup Python
           sudo apt-get install -y python3 python3-pip
           # Install global npm packages
@@ -39,6 +36,11 @@ jobs:
           npm install bcrypt@latest
           npm install bcryptjs@latest
           pip install requests
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '12'
 
       - name: Gitleaks Scan
         run: |
